@@ -5,8 +5,10 @@ export default function Home() {
   const [formData, setFormData] = useState({
     entityId: '',
     accessToken: '',
-    currency: '',
+    currency: 'USD',
     amount: '',
+    merchantIdentifier: '8ac7a4c7921bbc1e01922049d74b0738',
+    environment: 'test',
   });
 
   const [errors, setErrors] = useState({});
@@ -84,9 +86,14 @@ export default function Home() {
       const id = data.id;
       setCheckoutId(id);
 
+      // Determine which environment to use
+      const baseUrl = formData.environment === 'live' 
+        ? 'https://eu-prod.oppwa.com' 
+        : 'https://eu-test.oppwa.com';
+
       // Load the payment widget script
       const script = document.createElement('script');
-      script.src = `https://eu-test.oppwa.com/v1/paymentWidgets.js?checkoutId=${id}`;
+      script.src = `${baseUrl}/v1/paymentWidgets.js?checkoutId=${id}`;
       script.onload = () => {
         // Create form for payment widget
         const container = document.getElementById('checkoutContainer');
@@ -95,22 +102,24 @@ export default function Home() {
         const form = document.createElement('form');
         form.action = `/api/result?id=${id}&entityId=${encodeURIComponent(
           formData.entityId
-        )}&accessToken=${encodeURIComponent(formData.accessToken)}`;
+        )}&accessToken=${encodeURIComponent(formData.accessToken)}&environment=${formData.environment}`;
         form.className = 'paymentWidgets';
         form.setAttribute('data-brands', 'APPLEPAY');
 
         container.appendChild(form);
 
-        // Initialize payment widget
-        if (window.WPWLOptions) {
-          window.WPWLOptions.applePay = {
+        // Initialize wpwlOptions configuration
+        window.wpwlOptions = {
+          applePay: {
             displayName: 'Apple Demo',
             style: 'black',
             currencyCode: formData.currency,
             requiredBillingContactFields: ['email', 'name', 'postalAddress'],
-            merchantIdentifier: '8ac7a4c7921bbc1e01922049d74b0738',
-          };
-        }
+            submitOnPaymentAuthorized: ['customer'],
+            checkAvailability: 'applePayCapabilities',
+            merchantIdentifier: formData.merchantIdentifier,
+          },
+        };
       };
 
       document.body.appendChild(script);
@@ -129,6 +138,19 @@ export default function Home() {
 
       <section className={styles.section}>
         <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Environment</label>
+            <select
+              name="environment"
+              value={formData.environment}
+              onChange={handleInputChange}
+              className={styles.select}
+            >
+              <option value="test">Test (eu-test.oppwa.com)</option>
+              <option value="live">Live (eu-prod.oppwa.com)</option>
+            </select>
+          </div>
+
           <div className={styles.formGroup}>
             <input
               type="text"
@@ -183,6 +205,17 @@ export default function Home() {
             {errors.amount && (
               <div className={styles.errorMessage}>{errors.amount}</div>
             )}
+          </div>
+
+          <div className={styles.formGroup}>
+            <input
+              type="text"
+              name="merchantIdentifier"
+              placeholder="Merchant Identifier (Apple Pay)"
+              value={formData.merchantIdentifier}
+              onChange={handleInputChange}
+              className={styles.input}
+            />
           </div>
 
           {errors.submit && (

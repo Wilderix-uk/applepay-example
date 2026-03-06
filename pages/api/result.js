@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 export default async function handler(req, res) {
-  const { id } = req.query;
+  const { id, environment } = req.query;
 
   if (!id) {
     return res.status(400).json({ error: 'Checkout ID is required' });
@@ -21,7 +21,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://eu-prod.oppwa.com/v1/checkouts/${id}/payment`;
+    // Use the selected environment (test or live)
+    const baseUrl = environment === 'live' 
+      ? 'https://eu-prod.oppwa.com' 
+      : 'https://eu-test.oppwa.com';
+
+    const url = `${baseUrl}/v1/checkouts/${id}/payment`;
 
     const response = await axios.get(url, {
       params: {
@@ -37,6 +42,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       checkoutId: id,
+      environment: environment,
       result: response.data,
     });
   } catch (error) {
