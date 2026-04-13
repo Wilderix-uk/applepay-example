@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { entityId, accessToken, amount, currency, environment } = req.body;
+  const { entityId, accessToken, amount, currency, environment, createRegistration } = req.body;
 
   // Validation
   if (!entityId || entityId.length !== 32) {
@@ -31,14 +31,17 @@ export default async function handler(req, res) {
     
     const url = `${baseUrl}/v1/checkouts`;
     
+    const paramObj = {
+      entityId,
+      amount,
+      currency,
+      paymentType: 'DB',
+    };
+    if (createRegistration) paramObj.createRegistration = 'true';
+
     const response = await axios.post(
       url,
-      new URLSearchParams({
-        entityId: entityId,
-        amount: amount,
-        currency: currency,
-        paymentType: 'DB',
-      }).toString(),
+      new URLSearchParams(paramObj).toString(),
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
