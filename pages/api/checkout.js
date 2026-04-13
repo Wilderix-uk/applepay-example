@@ -1,5 +1,6 @@
 // Replaces functions.php - creates a checkout session
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -46,13 +47,21 @@ export default async function handler(req, res) {
       }
     );
 
-    // Store in session for later use
-    req.session = req.session || {};
-    req.session.entityId = entityId;
-    req.session.accessToken = accessToken;
-    req.session.environment = environment;
+    // Sign a short-lived token containing sensitive credentials so they
+    // are never exposed as plain query params in the result URL.
+    const secret = process.env.CHECKOUT_SECRET;
+    if (!secret) {
+      console.error('CHECKOUT_SECRET env var is not set');
+      return res.status(500).json({ error: 'Server misconfiguration: missing CHECKOUT_SECRET' });
+    }
 
-    return res.status(200).json({ ...response.data, environment });
+    const credToken = jwt.sign(
+      { entityId, accessToken, environment },
+      secret,
+      { expiresIn: '1h' }
+    );
+
+    return res.status(200).json({ ...response.data, environment, credToken });
   } catch (error) {
     console.error('Checkout error:', error.message);
     return res.status(500).json({

@@ -84,6 +84,7 @@ export default function Home() {
       }
 
       const id = data.id;
+      const credToken = data.credToken;
       setCheckoutId(id);
 
       // Determine which environment to use
@@ -100,9 +101,8 @@ export default function Home() {
         container.innerHTML = '';
 
         const form = document.createElement('form');
-        form.action = `/api/result?id=${id}&entityId=${encodeURIComponent(
-          formData.entityId
-        )}&accessToken=${encodeURIComponent(formData.accessToken)}&environment=${formData.environment}`;
+        // Use signed credToken instead of raw credentials in the result URL
+        form.action = `/api/result?id=${id}&token=${encodeURIComponent(credToken)}`;
         form.className = 'paymentWidgets';
         form.setAttribute('data-brands', 'APPLEPAY');
 
