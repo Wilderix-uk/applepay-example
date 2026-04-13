@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { entityId, accessToken, amount, currency, environment, createRegistration } = req.body;
+  const { entityId, accessToken, amount, currency, environment, createRegistration, extraParams } = req.body;
 
   // Validation
   if (!entityId || entityId.length !== 32) {
@@ -38,6 +38,11 @@ export default async function handler(req, res) {
       paymentType: 'DB',
     };
     if (createRegistration) paramObj.createRegistration = 'true';
+
+    // Merge any extra params from the custom params tab
+    if (extraParams && typeof extraParams === 'object') {
+      Object.assign(paramObj, extraParams);
+    }
 
     const response = await axios.post(
       url,

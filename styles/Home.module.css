@@ -67,6 +67,10 @@
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
+.inputError {
+  border-color: #d32f2f !important;
+}
+
 .select {
   width: 100%;
   padding: 10px;
@@ -86,6 +90,67 @@
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
+.textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+  background-color: #fafafa;
+  color: #333;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  background-color: #fff;
+}
+
+/* Hint text */
+.hint {
+  font-size: 11px;
+  color: #777;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* Checkbox group */
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 8px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.checkboxLabel:hover {
+  background: #e8f0fe;
+  border-color: #007bff;
+}
+
+.checkboxLabel input {
+  cursor: pointer;
+  accent-color: #007bff;
+}
+
+/* Primary action button */
 .button {
   width: 100%;
   padding: 10px;
@@ -108,13 +173,151 @@
   cursor: not-allowed;
 }
 
+/* Error message */
 .errorMessage {
   color: #d32f2f;
   font-size: 12px;
-  margin-top: -5px;
-  margin-bottom: 10px;
+  margin-top: 3px;
+  margin-bottom: 6px;
 }
 
+/* ── Advanced config panel ── */
+.configPanel {
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.configToggle {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: #f5f7ff;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  font-weight: bold;
+  color: #2e39bf;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: Arial, sans-serif;
+}
+
+.configToggle:hover {
+  background-color: #e8ecff;
+}
+
+.configBody {
+  border-top: 1px solid #ddd;
+  background-color: #fff;
+}
+
+/* ── Tabs ── */
+.tabBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 8px 8px 0 8px;
+  background-color: #f5f7ff;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab {
+  padding: 7px 12px;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  background-color: #eef0ff;
+  color: #555;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tab:hover {
+  background-color: #dce0ff;
+  color: #2e39bf;
+}
+
+.tabActive {
+  background-color: #fff;
+  color: #2e39bf;
+  border-color: #ddd;
+  border-bottom-color: #fff;
+  margin-bottom: -1px;
+  z-index: 1;
+  position: relative;
+}
+
+.tabContent {
+  padding: 16px;
+}
+
+/* ── Custom Parameters ── */
+.customParamsSection {
+  margin-top: 8px;
+}
+
+.customParamRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.customParamRow .input {
+  margin-bottom: 0;
+}
+
+.paramKeyInput {
+  flex: 1;
+}
+
+.paramValueInput {
+  flex: 2;
+}
+
+.removeButton {
+  padding: 8px 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #d32f2f;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.removeButton:hover {
+  background-color: #fdecea;
+  border-color: #d32f2f;
+}
+
+.addParamButton {
+  width: 100%;
+  padding: 8px;
+  background-color: #fff;
+  border: 1px dashed #007bff;
+  border-radius: 5px;
+  color: #007bff;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  transition: background-color 0.15s ease;
+  margin-top: 4px;
+}
+
+.addParamButton:hover {
+  background-color: #e8f0fe;
+}
+
+/* Checkout widget container */
 .checkoutContainer {
   text-align: center;
   margin-top: 20px;
@@ -146,5 +349,23 @@
 
   .footer {
     padding: 15px 0;
+  }
+
+  .tabBar {
+    gap: 1px;
+  }
+
+  .tab {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .customParamRow {
+    flex-wrap: wrap;
+  }
+
+  .paramKeyInput,
+  .paramValueInput {
+    flex: 1 1 100%;
   }
 }

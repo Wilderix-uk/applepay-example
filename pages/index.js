@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../styles/Home.module.css';
 
-const TABS = ['Tokenization', 'Basic', 'Payment Details', 'Shipping', 'Billing', 'Coupons'];
+const TABS = ['Tokenization', 'Basic', 'Payment Details', 'Shipping', 'Billing', 'Coupons', 'Custom Params'];
 
 const DEFAULT_WPWL = {
   // Basic
@@ -79,6 +79,8 @@ export default function Home() {
   });
 
   const [wpwl, setWpwl] = useState(DEFAULT_WPWL);
+  const [customCheckoutParams, setCustomCheckoutParams] = useState([]); // [{key, value}]
+  const [customWpwlParams, setCustomWpwlParams] = useState([]);          // [{key, value}]
   const [activeTab, setActiveTab] = useState('Tokenization');
   const [configOpen, setConfigOpen] = useState(false);
   const [errors, setErrors] = useState({});
@@ -196,6 +198,12 @@ export default function Home() {
     setLoading(true);
 
     try {
+      // Build extra checkout params from custom tab
+      const extraCheckoutParams = {};
+      customCheckoutParams.forEach(({ key, value }) => {
+        if (key.trim()) extraCheckoutParams[key.trim()] = value;
+      });
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -206,6 +214,7 @@ export default function Home() {
           amount: formData.amount,
           environment: formData.environment,
           createRegistration: formData.createRegistration,
+          extraParams: extraCheckoutParams,
         }),
       });
 
@@ -237,8 +246,14 @@ export default function Home() {
         form.setAttribute('data-brands', 'APPLEPAY');
         container.appendChild(form);
 
+        // Merge any custom wpwl params from the Custom Params tab
+        const builtOpts = buildWpwlOptions();
+        customWpwlParams.forEach(({ key, value }) => {
+          if (key.trim()) builtOpts[key.trim()] = value;
+        });
+
         window.wpwlOptions = {
-          applePay: buildWpwlOptions(),
+          applePay: builtOpts,
         };
       };
 
@@ -533,6 +548,77 @@ export default function Home() {
     </div>
   );
 
+  // ── Custom Params helpers ─────────────────────────────────────────────────
+  const addCustomParam = (setter) => setter((prev) => [...prev, { key: '', value: '' }]);
+
+  const updateCustomParam = (setter, index, field, val) =>
+    setter((prev) => prev.map((p, i) => i === index ? { ...p, [field]: val } : p));
+
+  const removeCustomParam = (setter, index) =>
+    setter((prev) => prev.filter((_, i) => i !== index));
+
+  const renderCustomParams = () => (
+    <div>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Custom Checkout Request Parameters</label>
+        <div className={styles.hint}>
+          Extra key/value pairs sent to <code>/api/checkout</code> and forwarded to the OPPWA checkout request (e.g. <code>shopperResultUrl</code>, <code>notificationUrl</code>, <code>billing.street1</code>).
+        </div>
+        <div className={styles.customParamsSection}>
+          {customCheckoutParams.map((p, i) => (
+            <div key={i} className={styles.customParamRow}>
+              <input
+                type="text"
+                placeholder="Key"
+                value={p.key}
+                onChange={(e) => updateCustomParam(setCustomCheckoutParams, i, 'key', e.target.value)}
+                className={`${styles.input} ${styles.paramKeyInput}`}
+              />
+              <input
+                type="text"
+                placeholder="Value"
+                value={p.value}
+                onChange={(e) => updateCustomParam(setCustomCheckoutParams, i, 'value', e.target.value)}
+                className={`${styles.input} ${styles.paramValueInput}`}
+              />
+              <button type="button" className={styles.removeButton} onClick={() => removeCustomParam(setCustomCheckoutParams, i)}>✕</button>
+            </div>
+          ))}
+          <button type="button" className={styles.addParamButton} onClick={() => addCustomParam(setCustomCheckoutParams)}>+ Add Checkout Parameter</button>
+        </div>
+      </div>
+
+      <div className={styles.formGroup}>
+        <label className={styles.label}>Custom wpwlOptions.applePay Parameters</label>
+        <div className={styles.hint}>
+          Extra key/value pairs added directly to <code>wpwlOptions.applePay</code>. String values only — use the JSON fields in other tabs for objects/arrays.
+        </div>
+        <div className={styles.customParamsSection}>
+          {customWpwlParams.map((p, i) => (
+            <div key={i} className={styles.customParamRow}>
+              <input
+                type="text"
+                placeholder="Key"
+                value={p.key}
+                onChange={(e) => updateCustomParam(setCustomWpwlParams, i, 'key', e.target.value)}
+                className={`${styles.input} ${styles.paramKeyInput}`}
+              />
+              <input
+                type="text"
+                placeholder="Value"
+                value={p.value}
+                onChange={(e) => updateCustomParam(setCustomWpwlParams, i, 'value', e.target.value)}
+                className={`${styles.input} ${styles.paramValueInput}`}
+              />
+              <button type="button" className={styles.removeButton} onClick={() => removeCustomParam(setCustomWpwlParams, i)}>✕</button>
+            </div>
+          ))}
+          <button type="button" className={styles.addParamButton} onClick={() => addCustomParam(setCustomWpwlParams)}>+ Add wpwlOptions Parameter</button>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderTab = () => {
     switch (activeTab) {
       case 'Tokenization': return renderTokenization();
@@ -541,6 +627,7 @@ export default function Home() {
       case 'Shipping': return renderShipping();
       case 'Billing': return renderBilling();
       case 'Coupons': return renderCoupons();
+      case 'Custom Params': return renderCustomParams();
       default: return null;
     }
   };
